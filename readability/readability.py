@@ -246,7 +246,9 @@ class Document:
         return output
 
     def select_best_candidate(self, candidates):
-        sorted_candidates = sorted(candidates.values(), key=lambda x: x['content_score'], reverse=True)
+        sorted_candidates = sorted(candidates.values(), key=lambda x: x['candidate_number'])
+        sorted_candidates.sort( key=lambda x: x['content_score'], reverse=True)
+
         for candidate in sorted_candidates[:5]:
             elem = candidate['elem']
             self.debug("Top 5 : %6.3f %s" % (
@@ -311,6 +313,7 @@ class Document:
         # Scale the final candidates score based on link density. Good content
         # should have a relatively small link density (5% or less) and be
         # mostly unaffected by this operation.
+        candidate_number = 0
         for elem in ordered:
             candidate = candidates[elem]
             ld = self.get_link_density(elem)
@@ -321,6 +324,8 @@ class Document:
                 ld,
                 score * (1 - ld)))
             candidate['content_score'] *= (1 - ld)
+            candidate['candidate_number'] = candidate_number
+            candidate_number += 1
 
         return candidates
 
