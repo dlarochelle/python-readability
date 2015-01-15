@@ -432,6 +432,7 @@ class Document:
             for e in reversed(node.findall('.//%s' % tag_name)):
                 yield e
 
+    COMMA_COUNT = 10
     def sanitize(self, node, candidates):
         MIN_LEN = self.options.get('min_text_length',
             self.TEXT_LENGTH_THRESHOLD)
@@ -458,7 +459,7 @@ class Document:
                 self.debug("Cleaned %s with score %6.3f and weight %-3s" %
                     (describe(el), content_score, weight, ))
                 el.drop_tree()
-            elif el.text_content().count(",") < 10:
+            elif el.text_content().count(",") < self.COMMA_COUNT:
                 counts = {}
                 for kind in ['p', 'img', 'li', 'a', 'embed', 'input']:
                     counts[kind] = len(el.findall('.//%s' % kind))
