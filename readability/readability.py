@@ -435,6 +435,9 @@ class Document:
     COMMA_COUNT = 10
     P_TO_INPUT_RATIO = 3
     HEADER_LINK_DENSITY_THRESHOLD = 0.33
+    LOW_WEIGHT_LINK_DENSITY_THRESHOLD = 0.2
+    HIGH_WEIGHT_LINK_DENSITY_THRESHOLD = 0.5
+    
 
     def sanitize(self, node, candidates):
         MIN_LEN = self.options.get('min_text_length',
@@ -501,11 +504,11 @@ class Document:
                 elif content_length < (MIN_LEN) and (counts["img"] == 0 or counts["img"] > 2):
                     reason = "too short content length %s without a single image" % content_length
                     to_remove = True
-                elif weight < 25 and link_density > 0.2:
+                elif weight < 25 and link_density > self.LOW_WEIGHT_LINK_DENSITY_THRESHOLD:
                         reason = "too many links %.3f for its weight %s" % (
                             link_density, weight)
                         to_remove = True
-                elif weight >= 25 and link_density > 0.5:
+                elif weight >= 25 and link_density > self.HIGH_WEIGHT_LINK_DENSITY_THRESHOLD:
                     reason = "too many links %.3f for its weight %s" % (
                         link_density, weight)
                     to_remove = True
