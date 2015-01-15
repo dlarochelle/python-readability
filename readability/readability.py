@@ -198,13 +198,16 @@ class Document:
             log.exception('error getting summary: ')
             raise Unparseable(str(e)), None, sys.exc_info()[2]
 
+    MIN_SIBLING_SCORE_THRESHOLD = 10
+    BEST_SCORE_MULTIPLIER_THRESHOLD = 0.2
+
     def get_article(self, candidates, best_candidate, html_partial=False):
         # Now that we have the top candidate, look through its siblings for
         # content that might also be related.
         # Things like preambles, content split by ads that we removed, etc.
         sibling_score_threshold = max([
-            10,
-            best_candidate['content_score'] * 0.2])
+            self.MIN_SIBLING_SCORE_THRESHOLD,
+            best_candidate['content_score'] * self.BEST_SCORE_MULTIPLIER_THRESHOLD])
         # create a new html document with a html->body->div
         if html_partial:
             output = fragment_fromstring('<div/>')
