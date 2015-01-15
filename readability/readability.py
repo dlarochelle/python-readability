@@ -201,6 +201,9 @@ class Document:
     MIN_SIBLING_SCORE_THRESHOLD = 10
     BEST_SCORE_MULTIPLIER_THRESHOLD = 0.2
 
+    LONG_NODE_LINK_DENSITY_THRESHOLD = 0.25
+    LONG_NODE_LENGTH                 = 80
+
     def get_article(self, candidates, best_candidate, html_partial=False):
         # Now that we have the top candidate, look through its siblings for
         # content that might also be related.
@@ -230,9 +233,9 @@ class Document:
                 node_content = sibling.text or ""
                 node_length = len(node_content)
 
-                if node_length > 80 and link_density < 0.25:
+                if node_length > self.LONG_NODE_LENGTH and link_density < self.LONG_NODE_LINK_DENSITY_THRESHOLD:
                     append = True
-                elif node_length <= 80 \
+                elif node_length <=  self.LONG_NODE_LENGTH \
                     and link_density == 0 \
                     and re.search('\.( |$)', node_content):
                     append = True
