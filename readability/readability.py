@@ -433,11 +433,14 @@ class Document:
                 yield e
 
     COMMA_COUNT = 10
+    P_TO_INPUT_RATIO = 3
+    HEADER_LINK_DENSITY_THRESHOLD = 0.33
+
     def sanitize(self, node, candidates):
         MIN_LEN = self.options.get('min_text_length',
             self.TEXT_LENGTH_THRESHOLD)
         for header in self.tags(node, "h1", "h2", "h3", "h4", "h5", "h6"):
-            if self.class_weight(header) < 0 or self.get_link_density(header) > 0.33:
+            if self.class_weight(header) < 0 or self.get_link_density(header) > self.HEADER_LINK_DENSITY_THRESHOLD:
                 header.drop_tree()
 
         for elem in self.tags(node, "form", "iframe", "textarea"):
@@ -492,7 +495,7 @@ class Document:
                 elif counts["li"] > counts["p"] and tag != "ul" and tag != "ol":
                     reason = "more <li>s than <p>s"
                     to_remove = True
-                elif counts["input"] > (counts["p"] / 3):
+                elif counts["input"] > (counts["p"] / self.P_TO_INPUT_RATIO):
                     reason = "less than 3x <p>s than <input>s"
                     to_remove = True
                 elif content_length < (MIN_LEN) and (counts["img"] == 0 or counts["img"] > 2):
