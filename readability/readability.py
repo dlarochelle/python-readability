@@ -437,7 +437,7 @@ class Document:
     HEADER_LINK_DENSITY_THRESHOLD = 0.33
     LOW_WEIGHT_LINK_DENSITY_THRESHOLD = 0.2
     HIGH_WEIGHT_LINK_DENSITY_THRESHOLD = 0.5
-    
+    MIN_EMBED_COMMENT_LENGTH = 75
 
     def sanitize(self, node, candidates):
         MIN_LEN = self.options.get('min_text_length',
@@ -498,7 +498,7 @@ class Document:
                 elif counts["li"] > counts["p"] and tag != "ul" and tag != "ol":
                     reason = "more <li>s than <p>s"
                     to_remove = True
-                elif counts["input"] > (counts["p"] / self.P_TO_INPUT_RATIO):
+                elif self.P_TO_INPUT_RATIO > 0 and counts["input"] > (counts["p"] / self.P_TO_INPUT_RATIO):
                     reason = "less than 3x <p>s than <input>s"
                     to_remove = True
                 elif content_length < (MIN_LEN) and (counts["img"] == 0 or counts["img"] > 2):
@@ -512,7 +512,7 @@ class Document:
                     reason = "too many links %.3f for its weight %s" % (
                         link_density, weight)
                     to_remove = True
-                elif (counts["embed"] == 1 and content_length < 75) or counts["embed"] > 1:
+                elif (counts["embed"] == 1 and content_length < self.MIN_EMBED_COMMENT_LENGTH) or counts["embed"] > 1:
                     reason = "<embed>s with too short content length, or too many <embed>s"
                     to_remove = True
 #                if el.tag == 'div' and counts['img'] >= 1 and to_remove:
