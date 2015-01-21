@@ -359,17 +359,22 @@ class Document:
 
         return weight
 
+    CONTENT_SCORE_DIV_BONUS = 5
+    CONTENT_SCORE_PRE_TD_BONUS = 3
+    CONTENT_SCORE_ADDRESS_OL_PENALTY = 3
+    CONTENT_SCORE_HEADER_PENALTY = 5
+    
     def score_node(self, elem):
         content_score = self.class_weight(elem)
         name = elem.tag.lower()
         if name == "div":
-            content_score += 5
+            content_score += self.CONTENT_SCORE_DIV_BONUS
         elif name in ["pre", "td", "blockquote"]:
-            content_score += 3
+            content_score += self.CONTENT_SCORE_PRE_TD_BONUS
         elif name in ["address", "ol", "ul", "dl", "dd", "dt", "li", "form"]:
-            content_score -= 3
+            content_score -=  self.CONTENT_SCORE_ADDRESS_OL_PENALTY
         elif name in ["h1", "h2", "h3", "h4", "h5", "h6", "th"]:
-            content_score -= 5
+            content_score -= self.CONTENT_SCORE_HEADER_PENALTY
         return {
             'content_score': content_score,
             'elem': elem
