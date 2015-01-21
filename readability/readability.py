@@ -438,6 +438,7 @@ class Document:
     LOW_WEIGHT_LINK_DENSITY_THRESHOLD = 0.2
     HIGH_WEIGHT_LINK_DENSITY_THRESHOLD = 0.5
     MIN_EMBED_COMMENT_LENGTH = 75
+    SIBLING_CONTENT_LENGTH_SUM = 1000
 
     def sanitize(self, node, candidates):
         MIN_LEN = self.options.get('min_text_length',
@@ -555,7 +556,7 @@ class Document:
                             if j == x:
                                 break
                     #self.debug(str(siblings))
-                    if siblings and sum(siblings) > 1000:
+                    if siblings and sum(siblings) > self.SIBLING_CONTENT_LENGTH_SUM:
                         to_remove = False
                         self.debug("Allowing %s" % describe(el))
                         for desnode in self.tags(el, "table", "ul", "div"):
