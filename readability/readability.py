@@ -276,6 +276,9 @@ class Document:
         total_length = text_length(elem)
         return float(link_length) / max(total_length, 1)
 
+    CONTENT_SCORE_START = 1
+    CONTENT_SCORE_INNER_TEXT_MIN_BONUS = 3
+    CONTENT_SCORE_GRAND_PARENT_BONUS_FACTOR = 2.0
     def score_paragraphs(self, ):
         MIN_LEN = self.options.get(
             'min_text_length',
@@ -305,16 +308,17 @@ class Document:
                     grand_parent_node)
                 ordered.append(grand_parent_node)
 
-            content_score = 1
+            
+            content_score = self.CONTENT_SCORE_START
             content_score += len(inner_text.split(','))
-            content_score += min((inner_text_len / 100), 3)
+            content_score += min((inner_text_len / 100), self.CONTENT_SCORE_INNER_TEXT_MIN_BONUS)
             #if elem not in candidates:
             #    candidates[elem] = self.score_node(elem)
 
             #WTF? candidates[elem]['content_score'] += content_score
             candidates[parent_node]['content_score'] += content_score
             if grand_parent_node is not None:
-                candidates[grand_parent_node]['content_score'] += content_score / 2.0
+                candidates[grand_parent_node]['content_score'] += content_score / self.CONTENT_SCORE_GRAND_PARENT_BONUS_FACTOR
 
         # Scale the final candidates score based on link density. Good content
         # should have a relatively small link density (5% or less) and be
@@ -335,15 +339,18 @@ class Document:
 
         return candidates
 
+    CLASS_WEIGHT_NEGATIVE_RE_PENALTY = 25
+    CLASS_WEIGHT_POSITVE_RE_BONUS = 25
+
     def class_weight(self, e):
         weight = 0
         for feature in [e.get('class', None), e.get('id', None)]:
             if feature:
                 if REGEXES['negativeRe'].search(feature):
-                    weight -= 25
+                    weight -= self.CLASS_WEIGHT_NEGATIVE_RE_PENALTY
 
                 if REGEXES['positiveRe'].search(feature):
-                    weight += 25
+                    weight += self.CLASS_WEIGHT_POSITVE_RE_BONUS
 
                 if self.positive_keywords and self.positive_keywords.search(feature):
                     weight += 25
@@ -444,6 +451,7 @@ class Document:
     HIGH_WEIGHT_LINK_DENSITY_THRESHOLD = 0.5
     MIN_EMBED_COMMENT_LENGTH = 75
     SIBLING_CONTENT_LENGTH_SUM = 1000
+    LI_COUNT_REDUCTION = 100
 
     def sanitize(self, node, candidates):
         MIN_LEN = self.options.get('min_text_length',
@@ -475,7 +483,7 @@ class Document:
                 counts = {}
                 for kind in ['p', 'img', 'li', 'a', 'embed', 'input']:
                     counts[kind] = len(el.findall('.//%s' % kind))
-                counts["li"] -= 100
+                counts["li"] -=  self.LI_COUNT_REDUCTION
                 counts["input"] -= len(el.findall('.//input[@type="hidden"]'))
 
                 # Count the text length excluding any surrounding whitespace
